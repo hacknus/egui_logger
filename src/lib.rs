@@ -115,20 +115,20 @@ pub fn init_with_max_level(max_level: log::LevelFilter) -> Result<(), SetLoggerE
     builder().max_level(max_level).init()
 }
 
-struct Record {
-    level: log::Level,
-    message: String,
-    target: String,
-    time: chrono::DateTime<chrono::Local>,
+pub struct Record {
+    pub level: log::Level,
+    pub message: String,
+    pub target: String,
+    pub time: chrono::DateTime<chrono::Local>,
 }
 
-struct Logger {
-    logs: Vec<Record>,
+pub struct Logger {
+    pub logs: Vec<Record>,
     categories: HashMap<String, bool>,
     max_category_length: usize,
     start_time: chrono::DateTime<chrono::Local>,
 }
-static LOGGER: LazyLock<Mutex<Logger>> = LazyLock::new(|| {
+pub static LOGGER: LazyLock<Mutex<Logger>> = LazyLock::new(|| {
     Mutex::new(Logger {
         logs: Vec::new(),
         categories: HashMap::new(),
