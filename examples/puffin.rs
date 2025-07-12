@@ -1,11 +1,14 @@
+// This example needs the puffin feature enabled to work
+// you can test this with:
+// cargo run --example puffin --features puffin
+
 use eframe::NativeOptions;
+use puffin_egui::puffin;
 
 fn main() {
+    puffin::set_scopes_on(true);
     // Initialize the logger
     egui_logger::builder()
-        // If set to false, will only show explicitly enabled categories using `enable_category`
-        // (see below for an example). By default, this is set to true.
-        .show_all_categories(false)
         .init()
         .expect("Error initializing logger");
 
@@ -19,7 +22,11 @@ struct MyApp;
 
 impl eframe::App for MyApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
+        puffin::GlobalProfiler::lock().new_frame();
+        puffin_egui::profiler_window(ctx);
         egui::CentralPanel::default().show(ctx, |ui| {
+            #[cfg(feature = "puffin")]
+            puffin::profile_scope!("Render UI");
             if ui.button("This produces Debug Info").clicked() {
                 log::debug!("Very verbose Debug Info")
             }
@@ -32,17 +39,19 @@ impl eframe::App for MyApp {
             if ui.button("This produces a Warning").clicked() {
                 log::warn!("Warn about something")
             }
+            if ui.button("This produces 1000 Warnings").clicked() {
+                (1..1000).for_each(|x| log::warn!("Warn: {}", x));
+                log::warn!("Warn about something")
+            }
+            if ui.button("This produces 100_000 Warnings").clicked() {
+                (1..100_000).for_each(|x| log::warn!("Warn: {}", x));
+                log::warn!("Warn about something")
+            }
         });
         egui::Window::new("Log").show(ctx, |ui| {
             // draws the actual logger ui
             egui_logger::LoggerUi::default()
                 .enable_regex(true) // enables regex, default is true
-                .enable_search(true) // enables search bar, default is true
-                .max_log_length(2000) // sets maximum log messages to be retained, default is 1000
-                // Since we set "show_all_categories" to false in `main`, we should enable some
-                // categories to be shown by default.
-                .enable_category("hello".into(), true)
-                .enable_category("egui_glow::painter".into(), true)
                 .show(ui)
         });
     }
