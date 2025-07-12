@@ -23,7 +23,7 @@ struct MyApp;
 impl eframe::App for MyApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         puffin::GlobalProfiler::lock().new_frame();
-        puffin_egui::profiler_window(ctx);
+        // puffin_egui::profiler_window(ctx);
         egui::CentralPanel::default().show(ctx, |ui| {
             #[cfg(feature = "puffin")]
             puffin::profile_scope!("Render UI");
